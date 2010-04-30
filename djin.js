@@ -3,10 +3,12 @@ var Djin = (
   function()
   {
     
+    var dbName = '';
     create = function(databaseName)
     {
       var dbSize = 5*1024*1024; //5MB of default storage
       this.dbPointer = openDatabase(databaseName, "1.0", "some description", dbSize);
+      dbName = databaseName;
       if(!this.dbPointer)
         return false;
       return true;
@@ -29,7 +31,12 @@ var Djin = (
         t.executeSql('CREATE TABLE IF NOT EXISTS '+tableName+'('+fields.join(',')+')',[],null,
           function(e){ DjinErrors['createTable']='Unable to create a table'; }); 
       });
-      return DjinErrors['createTable'] == null;
+      var isValid = DjinErrors['createTable']==null;
+      //Store database metadata in localStorage for later usage. Unable to get database metadata directly from it right now.
+      var keyName = dbName+'MetaData_table_'+tableName;
+      var value = serialize(params);
+      localStorage.setItem(keyName,value);
+      return isValid;
     }
 
     add = function(tableName,value)
